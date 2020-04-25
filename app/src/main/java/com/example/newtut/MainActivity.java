@@ -32,13 +32,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void myNotification(View view) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "personal_notifications")
+        String channelId = "My_channel_id";
+        Notification.Builder builder = new Notification.Builder(this, channelId)
                 .setContentTitle("Notification")
                 .setContentText("Ich bin eine Notification")
                 .setSmallIcon(R.drawable.ic_message)
                 .setCategory(Notification.CATEGORY_PROGRESS)
-                .setLights(Color.argb(255,255,0,0), 10 , 10)
                 .setAutoCancel(true);
 
         Intent intent = new Intent(this, NotificationActivity.class);
@@ -48,12 +49,10 @@ public class MainActivity extends AppCompatActivity {
         builder.setContentIntent(pendingIntent);
 
         NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String channelId = "My_channel_id";
-            NotificationChannel channel = new NotificationChannel(channelId, "name of channel", NotificationManager.IMPORTANCE_DEFAULT);
-            notificationManager.createNotificationChannel(channel);
-            builder.setChannelId(channelId);
-        }
+        NotificationChannel channel = new NotificationChannel(channelId, "name of channel", NotificationManager.IMPORTANCE_DEFAULT);
+        notificationManager.createNotificationChannel(channel);
+        builder.setChannelId(channelId);
+
         notificationManager.notify(0, builder.build());
 
     }
