@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
         builder.setChannelId(channelId);
 
         notificationManager.notify(0, builder.build());
-
     }
 
     @Override
