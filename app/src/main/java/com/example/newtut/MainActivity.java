@@ -5,14 +5,15 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.EditText;
+import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -34,6 +35,25 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+    }
+
+    public void mycopy(View view) {
+        EditText e = (EditText)findViewById(R.id.editTextCopy);
+        String input = e.getText().toString();
+        ClipboardManager clipboardManager = (ClipboardManager)this.getSystemService(this.CLIPBOARD_SERVICE);
+        ClipData clipData = ClipData.newPlainText("input", input);
+        clipboardManager.setPrimaryClip(clipData);
+    }
+
+    public void mypaste(View view) {
+        ClipboardManager clipboardManager = (ClipboardManager)this.getSystemService(this.CLIPBOARD_SERVICE);
+        ContentResolver contentResolver = this.getContentResolver();
+        ClipData clipData = clipboardManager.getPrimaryClip();
+        if(clipData != null) {
+            ClipData.Item item = clipData.getItemAt(0);
+            CharSequence s = item.getText();
+            ((TextView)findViewById(R.id.textView)).setText(s);
+        }
     }
 
     public void phone(View view) {
