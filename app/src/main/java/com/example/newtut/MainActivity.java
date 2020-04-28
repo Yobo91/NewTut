@@ -1,17 +1,20 @@
 package com.example.newtut;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -33,12 +36,23 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void phone(View view) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:0123456789"));
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, 44);
+            return;
+        }
+        startActivity(intent);
+    }
+
     public void sendEmail(View view){
         String[] to = {"philipp1501@gmx.de", "jani-philipp@gmx.de"};
         String[] cc = {"jani.knapp@gmx.de"};
 
         Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setDataAndType(Uri.parse("mailto"), "text/plain");
+        //intent.setDataAndType(Uri.parse("mailto"), "text/plain");
+        intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_EMAIL, to);
         intent.putExtra(Intent.EXTRA_CC, cc);
         intent.putExtra(Intent.EXTRA_SUBJECT, "Ich bin der Betreff");
