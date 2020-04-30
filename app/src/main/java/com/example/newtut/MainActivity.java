@@ -8,9 +8,11 @@ import android.app.PendingIntent;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -26,7 +28,14 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity {
+
+    MediaRecorder mediaRecorder;
+    boolean isRecording = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,26 +44,39 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-    }
-
-    public void mycopy(View view) {
-        EditText e = (EditText)findViewById(R.id.editTextCopy);
-        String input = e.getText().toString();
-        ClipboardManager clipboardManager = (ClipboardManager)this.getSystemService(this.CLIPBOARD_SERVICE);
-        ClipData clipData = ClipData.newPlainText("input", input);
-        clipboardManager.setPrimaryClip(clipData);
-    }
-
-    public void mypaste(View view) {
-        ClipboardManager clipboardManager = (ClipboardManager)this.getSystemService(this.CLIPBOARD_SERVICE);
-        ContentResolver contentResolver = this.getContentResolver();
-        ClipData clipData = clipboardManager.getPrimaryClip();
-        if(clipData != null) {
-            ClipData.Item item = clipData.getItemAt(0);
-            CharSequence s = item.getText();
-            ((TextView)findViewById(R.id.textView)).setText(s);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 43);
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 42);
         }
     }
+
+    public void startRecord(View view) {
+
+        mediaRecorder = new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setOutputFile(this.getExternalFilesDir(null).getAbsolutePath() + "/aufnahme.3gp");
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        try {
+            mediaRecorder.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mediaRecorder.start();
+        isRecording = true;
+    }
+
+    public void stopRecord(View view){
+        if(isRecording) {
+            mediaRecorder.stop();
+            mediaRecorder.release();
+            isRecording = false;
+        }
+    }
+
 
     public void phone(View view) {
         Intent intent = new Intent(Intent.ACTION_CALL);
