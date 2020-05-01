@@ -8,6 +8,9 @@ import android.app.PendingIntent;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -78,14 +81,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void phone(View view) {
-        Intent intent = new Intent(Intent.ACTION_CALL);
-        intent.setData(Uri.parse("tel:0123456789"));
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, 44);
-            return;
+        Uri uri = Uri.parse(this.getExternalFilesDir(null).getAbsolutePath() + "/aufnahme.3gp");
+        MediaPlayer mediaPlayer = new MediaPlayer();
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH) //CONTENT_TYPE_MUSIC, CONTENT_TYPE_VIDEO; CONTENT_TYPE_UNKNOWN,...
+                .build();
+        mediaPlayer.setAudioAttributes(audioAttributes);
+        try {
+            mediaPlayer.setDataSource(getApplicationContext(), uri);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        startActivity(intent);
+
     }
 
     public void sendEmail(View view){
