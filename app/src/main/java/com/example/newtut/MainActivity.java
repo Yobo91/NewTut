@@ -13,9 +13,11 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     MediaRecorder mediaRecorder;
     boolean isRecording = false;
+    boolean isPlaying = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,21 +85,35 @@ public class MainActivity extends AppCompatActivity {
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public void phone(View view) {
-        Uri uri = Uri.parse(this.getExternalFilesDir(null).getAbsolutePath() + "/aufnahme.3gp");
-        MediaPlayer mediaPlayer = new MediaPlayer();
-        AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH) //CONTENT_TYPE_MUSIC, CONTENT_TYPE_VIDEO; CONTENT_TYPE_UNKNOWN,...
-                .build();
-        mediaPlayer.setAudioAttributes(audioAttributes);
-        try {
-            mediaPlayer.setDataSource(getApplicationContext(), uri);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void playMedia(View view) {
+        if(!isPlaying) {
+            MediaPlayer mediaPlayer = new MediaPlayer();
+            Uri uri = Uri.parse(this.getExternalFilesDir(null).getAbsolutePath() + "/aufnahme.3gp");
+            WifiManager.WifiLock wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "42");
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH) //CONTENT_TYPE_MUSIC, CONTENT_TYPE_VIDEO; CONTENT_TYPE_UNKNOWN,...
+                    .build();
+            mediaPlayer.setAudioAttributes(audioAttributes);
+            try {
+                mediaPlayer.setDataSource(getApplicationContext(), uri);
+                mediaPlayer.prepare();
+                mediaPlayer.setScreenOnWhilePlaying(true);
+                //mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+                wifiLock.acquire();
+                mediaPlayer.start();
+                isPlaying = true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mp.release();
+                    isPlaying = false;
+                }
+            });
+            wifiLock.release();
         }
-
     }
 
     public void sendEmail(View view){
