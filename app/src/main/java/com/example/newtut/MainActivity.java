@@ -2,10 +2,12 @@ package com.example.newtut;
 
 
 import android.os.Bundle;
+import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import androidx.fragment.app.FragmentTransaction;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -18,13 +20,17 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         if(findViewById(R.id.fragment_container) != null) {
-            if(savedInstanceState != null) {
-                return;
-            }
             BlankFragment bf = new BlankFragment();
-            bf.setArguments(getIntent().getExtras());
+            //bf.setArguments(getIntent().getExtras());
             getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, bf).commit();
         }
+    }
+
+    public void frag(View view){
+        FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+        t.replace(R.id.fragment_container, new BlankFragment2());
+        t.addToBackStack(null);
+        t.commit();
     }
 
     @Override
