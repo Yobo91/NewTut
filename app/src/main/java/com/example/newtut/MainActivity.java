@@ -3,11 +3,17 @@ package com.example.newtut;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TableLayout;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager2.widget.ViewPager2;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -20,9 +26,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager(), getLifecycle());
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                
         viewPager = (ViewPager2) findViewById(R.id.pager);
+        collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager(), getLifecycle());
         viewPager.setAdapter(collectionPagerAdapter);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayout, viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
+            @Override
+            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                tab.setText("Tab " + position);
+            }
+        });
+        tabLayoutMediator.attach();
     }
 
     @Override
