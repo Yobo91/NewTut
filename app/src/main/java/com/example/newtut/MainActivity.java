@@ -2,23 +2,20 @@ package com.example.newtut;
 
 
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.TableLayout;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.viewpager2.widget.ViewPager2;
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.ListAdapter;
+import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    CollectionPagerAdapter collectionPagerAdapter;
-    ViewPager2 viewPager;
+    private List<String> liste = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,19 +24,25 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                
-        viewPager = (ViewPager2) findViewById(R.id.pager);
-        collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager(), getLifecycle());
-        viewPager.setAdapter(collectionPagerAdapter);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(tabLayout, viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
-            @Override
-            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-                tab.setText("Tab " + position);
-            }
-        });
-        tabLayoutMediator.attach();
+        RecyclerView recyclerView = (RecyclerView)findViewById(R.id.list);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        MeinAdapter meinAdapter = new MeinAdapter(liste);
+        recyclerView.setAdapter(meinAdapter);
+
+        liste.add("Java");
+        liste.add("Python");
+        liste.add("Rust");
+        liste.add("C");
+        liste.add("JavaSkript");
+        liste.add("PHP");
+        liste.add("Haskell");
+        liste.add("HTML");
+        liste.add("CSS");
+        liste.add("C#");
+        meinAdapter.notifyDataSetChanged();
     }
 
     @Override
