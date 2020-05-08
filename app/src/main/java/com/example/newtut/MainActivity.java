@@ -1,21 +1,17 @@
 package com.example.newtut;
 
 
-import android.os.Bundle;
+
+import android.os.*;
+import android.view.*;
+import android.widget.Button;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.ListAdapter;
-import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
-import java.util.List;
-
+@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class MainActivity extends AppCompatActivity {
-    private List<String> liste = new ArrayList<String>();
+    private Camera camera;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,26 +19,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        RecyclerView recyclerView = (RecyclerView)findViewById(R.id.list);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        MeinAdapter meinAdapter = new MeinAdapter(liste);
-        recyclerView.setAdapter(meinAdapter);
+        HandlerThread handlerThread = new HandlerThread("Background Handler");
+        handlerThread.start();
+        Handler handler = new Handler(handlerThread.getLooper());
+        TextureView textureView = (TextureView) findViewById(R.id.texture);
+        camera = new Camera(this, textureView, handler, this);
+        textureView.setSurfaceTextureListener(camera.textureListener);
 
-        liste.add("Java");
-        liste.add("Python");
-        liste.add("Rust");
-        liste.add("C");
-        liste.add("JavaSkript");
-        liste.add("PHP");
-        liste.add("Haskell");
-        liste.add("HTML");
-        liste.add("CSS");
-        liste.add("C#");
-        meinAdapter.notifyDataSetChanged();
+        Button takePictureBtn = (Button) findViewById(R.id.foto);
+        takePictureBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                camera.takePicture();
+            }
+        });
     }
 
     @Override
