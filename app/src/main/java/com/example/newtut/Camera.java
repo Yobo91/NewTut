@@ -13,6 +13,7 @@ import android.media.ImageReader;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Size;
+import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.WindowManager;
@@ -26,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class Camera {
@@ -33,7 +35,14 @@ public class Camera {
     private Context mContext;
     private TextureView textureView;
     private Handler handler;
-    Size imageSize; //Size android.util
+    private Size imageSize; //Size android.util
+    private static  final SparseIntArray ORIENTATIONS = new SparseIntArray();
+    static {
+        ORIENTATIONS.append(Surface.ROTATION_0,90);
+        ORIENTATIONS.append(Surface.ROTATION_90,0);
+        ORIENTATIONS.append(Surface.ROTATION_180,270);
+        ORIENTATIONS.append(Surface.ROTATION_270,180);
+    }
     protected TextureView.SurfaceTextureListener textureListener = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
@@ -84,9 +93,11 @@ public class Camera {
     private void openCam() {
         CameraManager cameraManager = (CameraManager)mContext.getSystemService(Context.CAMERA_SERVICE);
         try {
+            assert cameraManager != null;
             String camID = cameraManager.getCameraIdList()[0];
             CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(camID);
             StreamConfigurationMap streamConfigurationMap = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+            assert streamConfigurationMap != null;
             imageSize = streamConfigurationMap.getOutputSizes(SurfaceTexture.class)[0];
             if(ActivityCompat.checkSelfPermission(mContext, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
                     ActivityCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -136,8 +147,9 @@ public class Camera {
         CameraManager cameraManager = (CameraManager)mContext.getSystemService(Context.CAMERA_SERVICE);
         try {
             Size[] sizes;
+            assert cameraManager != null;
             CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraDevice.getId());
-            sizes = cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP).getOutputSizes(ImageFormat.JPEG);
+            sizes = Objects.requireNonNull(cameraCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)).getOutputSizes(ImageFormat.JPEG);
             int width, height;
             if(sizes.length > 0) {
                 width = sizes[0].getWidth();
@@ -148,20 +160,16 @@ public class Camera {
             }
             final ImageReader imageReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, 1);
             Surface input = new Surface(textureView.getSurfaceTexture());
-            List<Surface> list = new ArrayList<Surface>();
+            List<Surface> list = new ArrayList<>(2);
             list.add(input);
             list.add(imageReader.getSurface());
             Surface output = imageReader.getSurface();
             final CaptureRequest.Builder builder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             builder.addTarget(output);
             builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-            int rotation = ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
-            int actualrotation = 0;
-            if(rotation == Surface.ROTATION_0) {
-                actualrotation = 90;
-            }
-            builder.set(CaptureRequest.JPEG_ORIENTATION, actualrotation);
-            final File file = new File(mContext.getExternalFilesDir(null).getAbsolutePath() + "/meinBild.jpg");
+            int rotation = ((WindowManager) Objects.requireNonNull(mContext.getSystemService(Context.WINDOW_SERVICE))).getDefaultDisplay().getRotation();
+            builder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation));
+            final File file = new File(Objects.requireNonNull(mContext.getExternalFilesDir(null)).getAbsolutePath() + "/meinBild.jpg");
             ImageReader.OnImageAvailableListener onImageAvailableListener = new ImageReader.OnImageAvailableListener() {
                 Image image = null;
                 @Override
