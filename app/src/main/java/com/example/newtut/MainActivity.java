@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
         handlerThread.start();
         Handler handler = new Handler(handlerThread.getLooper());
         TextureView textureView = (TextureView) findViewById(R.id.texture);
-        camera = new Camera(this, textureView, handler, this);
+        camera = new Camera(this, textureView, handler, MainActivity.this);
         textureView.setSurfaceTextureListener(camera.textureListener);
 
         Button takePictureBtn = (Button) findViewById(R.id.foto);
